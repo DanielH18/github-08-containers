@@ -1,4 +1,4 @@
-name: Deployment (Container)
+name: Service Conatiner in Runner
 on:
   push:
     branches:
@@ -12,18 +12,17 @@ jobs:
   test:
     environment: testing
     runs-on: ubuntu-latest # this ubuntu machine will host the docker image container
-    container:
-      image: node:16 # an official docker container as an example here
-#      env:  # environment variable for container directly only
     env:
       MONGODB_CONNECTION_PROTOCOL: mongodb
-      MONGODB_CLUSTER_ADDRESS: mongodb # is the service container label name
+      MONGODB_CLUSTER_ADDRESS: 127.0.0.1:27017 # bind the localhost to the mongodb specific port
       MONGODB_USERNAME: root
       MONGODB_PASSWORD: example
       PORT: 8080
     services:
       mongodb: # a service container label or name
         image: mongo # an official docker image
+        ports: # open the port by container 'ports' configuration
+          - 27017:27017 # bind the internal port '27017' to the same runner machine port '27017' (see at MONGODB_CLUSTER_ADDRESS)
         env: # it depends on docker image
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: example
