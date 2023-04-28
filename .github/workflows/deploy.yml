@@ -7,17 +7,27 @@ on:
 env:
   CACHE_KEY: node-deps
   MONGODB_DB_NAME: gha-demo
+
 jobs:
   test:
     environment: testing
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # this ubuntu machine will host the docker image container
+    container:
+      image: node:16 # an official docker container as an example here
+#      env:  # environment variable for container directly only
     env:
-      MONGODB_CONNECTION_PROTOCOL: mongodb+srv
-      MONGODB_CLUSTER_ADDRESS: cluster0.ntrwp.mongodb.net
-      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
-      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+      MONGODB_CONNECTION_PROTOCOL: mongodb
+      MONGODB_CLUSTER_ADDRESS: mongodb # is the service container label name
+      MONGODB_USERNAME: root
+      MONGODB_PASSWORD: example
       PORT: 8080
-    steps:
+    services:
+      mongodb: # a service container label or name
+        image: mongo # an official docker image
+        env: # it depends on docker image
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: example
+    steps: # all this steps run in the configured container
       - name: Get Code
         uses: actions/checkout@v3
       - name: Cache dependencies
@@ -41,7 +51,7 @@ jobs:
       - name: Output information
         env:
           PORT: 3000
-        run: |        
+        run: |
           echo "MONGODB_DB_NAME: $MONGODB_DB_NAME"
           echo "MONGODB_USERNAME: $MONGODB_USERNAME"
           echo "${{ env.PORT }}"
